@@ -1,0 +1,11 @@
+# caches
+.cache/
+**/.cache/
+**/cache/
+**/*.log
+
+.ssh/
+**/*secret*
+**/*token*
+**/*credential*
+**/*private*
