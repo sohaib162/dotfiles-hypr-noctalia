@@ -273,7 +273,7 @@
     "general": {
         "allowPanelsOnScreenWithoutBar": true,
         "animationDisabled": false,
-        "animationSpeed": 1,
+        "animationSpeed": 1.25,
         "avatarImage": "/home/sohaib/Downloads/125684447.png",
         "boxRadiusRatio": 1,
         "compactLockScreen": false,

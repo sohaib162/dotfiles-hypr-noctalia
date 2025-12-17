@@ -41,6 +41,7 @@ alias grep='grep --color=auto'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias cl='clear'
+alias hyprconf='nano .config/hypr/hyprland.conf'
 # Useful functions
 mkcd() { mkdir -p "$1" && cd "$1"; }
 
