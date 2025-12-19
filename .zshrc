@@ -41,6 +41,8 @@ alias grep='grep --color=auto'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias cl='clear'
+alias fyp='conda activate fyp'
+alias gpu='watch -n 1 -d nvidia-smi'
 alias hyprconf='nano .config/hypr/hyprland.conf'
 # Useful functions
 mkcd() { mkdir -p "$1" && cd "$1"; }
@@ -101,5 +103,21 @@ zinit light Aloxaf/fzf-tab
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(end-of-line forward-char)
 
 # Nice: show fastfetch on new terminal (comment if you dislike it)
-# command -v fastfetch >/dev/null && fastfetch
+#command -v fastfetch >/dev/null && fastfetch
 PROMPT=$'%~\n⚡ '
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/sohaib/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/sohaib/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/sohaib/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/sohaib/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+

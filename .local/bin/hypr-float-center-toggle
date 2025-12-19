@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+W="${1:-1200}"   # width in px
+H="${2:-800}"    # height in px
+
+# Try JSON first (fast/clean). Fallback to text parsing if needed.
+floating="$(hyprctl -j activewindow 2>/dev/null | jq -r '.floating // empty' 2>/dev/null || true)"
+if [ -z "${floating}" ]; then
+  floating="$(hyprctl activewindow | grep -Po 'floating: \K[0-9]+' || echo 0)"
+fi
+
+if [ "$floating" = "0" ]; then
+  # tiled -> floating + size + center (1 = respect reserved areas like bars)
+  hyprctl --batch "dispatch togglefloating; dispatch resizeactive exact $W $H; dispatch centerwindow 1"
+else
+  # floating -> tiled
+  hyprctl dispatch togglefloating
+fi
