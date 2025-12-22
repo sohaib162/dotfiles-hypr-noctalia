@@ -1,0 +1,5 @@
+#!/bin/bash
+# Quick commit all changes
+
+git add .
+git commit -m "$(date +'%Y-%m-%d %H:%M') - Quick commit"

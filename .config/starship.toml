@@ -7,7 +7,24 @@ $character"""
 
 [character]
 success_symbol = "⚡ "
-error_symbol = "⚡ "
+error_symbol = "💥 "
+
+[battery]
+full_symbol = "🔋"
+charging_symbol = "⚡"
+discharging_symbol = "💥"
+
+[python]
+symbol = "🐍"
+
+[nodejs]
+symbol = "🟢"
+
+[rust]
+symbol = "🦀"
+
+[package]
+symbol = "📦"
 
 [directory]
 truncation_length = 3

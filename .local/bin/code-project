@@ -1,0 +1,17 @@
+#!/bin/bash
+# Open project in code-oss and kitty
+
+if [ -z "$1" ]; then
+  echo "Usage: code-project <project-name>"
+  exit 1
+fi
+
+PROJECT_DIR="$HOME/Projects/$1"
+
+if [ ! -d "$PROJECT_DIR" ]; then
+  echo "Project $1 not found in ~/Projects"
+  exit 1
+fi
+
+code-oss "$PROJECT_DIR" &
+kitty --working-directory "$PROJECT_DIR" &

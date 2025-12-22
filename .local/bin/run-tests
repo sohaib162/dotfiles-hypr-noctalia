@@ -1,0 +1,12 @@
+#!/bin/bash
+# Run tests based on project type
+
+if [ -f "package.json" ]; then
+  npm test
+elif [ -f "pyproject.toml" ] || [ -f "setup.py" ]; then
+  python -m pytest
+elif [ -f "Cargo.toml" ]; then
+  cargo test
+else
+  echo "No test framework detected"
+fi

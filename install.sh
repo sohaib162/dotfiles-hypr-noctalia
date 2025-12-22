@@ -28,4 +28,33 @@ backup_and_link ".config/quickshell/noctalia-shell"
 [ -f "$REPO_DIR/.zprofile" ] && backup_and_link ".zprofile"
 [ -f "$REPO_DIR/.zshenv" ] && backup_and_link ".zshenv"
 
+backup_and_link ".local/bin"
+
+# Install coding dependencies
+echo "Installing coding dependencies..."
+
+# Install code-oss if not present
+if ! command -v code-oss &> /dev/null && ! command -v code &> /dev/null; then
+  echo "Installing VS Code..."
+  sudo dnf install -y code
+fi
+
+# Install gitg
+if ! command -v gitg &> /dev/null; then
+  sudo dnf install -y gitg
+fi
+
+# Install python tools
+sudo dnf install -y python3-pip python3-venv
+
+# Install nodejs if not
+if ! command -v node &> /dev/null; then
+  sudo dnf install -y nodejs npm
+fi
+
+# Make scripts executable
+chmod +x "$REPO_DIR/.local/bin/"*
+
+echo "Coding tools installed."
+
 echo "✅ Installed. Backup of previous files is in: $BK"

@@ -44,6 +44,26 @@ alias cl='clear'
 alias fyp='conda activate fyp'
 alias gpu='watch -n 1 -d nvidia-smi'
 alias hyprconf='nano .config/hypr/hyprland.conf'
+
+# Coding aliases
+alias gl='git log --oneline --graph --decorate'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias py='python'
+alias pip='python -m pip'
+alias venv='python -m venv'
+alias act='source venv/bin/activate'
+alias dev='npm run dev'
+alias build='npm run build'
+alias test='npm test'
+
+# Function to cd to project
+function proj() {
+  cd ~/Projects/$1
+}
+
 # Useful functions
 mkcd() { mkdir -p "$1" && cd "$1"; }
 
@@ -69,6 +89,13 @@ extract() {
 
 # zoxide (smart cd)
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+
+# Auto activate venv on cd
+function chpwd() {
+  if [[ -d ".venv" ]]; then
+    source .venv/bin/activate
+  fi
+}
 
 # starship prompt
 command -v starship >/dev/null && eval "$(starship init zsh)"
