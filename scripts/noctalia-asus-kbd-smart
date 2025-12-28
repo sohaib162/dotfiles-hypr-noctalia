@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+JSON="$HOME/.cache/noctalia/kbd_wallpaper.json"
+[[ -f "$JSON" ]] || exit 0
+
+python3 - <<'PY'
+import json, os, colorsys, math
+from PIL import Image
+
+JSON_PATH = os.path.expanduser("~/.cache/noctalia/kbd_wallpaper.json")
+data = json.load(open(JSON_PATH, "r", encoding="utf-8"))
+img_path = (data.get("image","") or "").strip()
+fallback = ((data.get("fallback","") or "")).strip().lstrip("#")
+
+# Keyboard background is almost always black on TUF; keep it as black.
+BG_LUM = 0.0
+TARGET_CONTRAST = 10.0   # higher = brighter/more readable
+MIN_SAT = 0.25          # avoid gray/washed colors
+
+def srgb_to_lin(c):
+    c = c/255.0
+    return c/12.92 if c <= 0.04045 else ((c+0.055)/1.055)**2.4
+
+def rel_luminance(rgb):
+    r,g,b = rgb
+    R,G,B = srgb_to_lin(r), srgb_to_lin(g), srgb_to_lin(b)
+    return 0.2126*R + 0.7152*G + 0.0722*B
+
+def contrast_ratio(L1, L2):
+    hi, lo = (L1, L2) if L1 >= L2 else (L2, L1)
+    return (hi + 0.05) / (lo + 0.05)
+
+def clamp(x,a,b): 
+    return a if x < a else b if x > b else x
+
+def adjust_for_contrast(rgb):
+    """Preserve hue, keep saturation, increase lightness until contrast meets target."""
+    r,g,b = [x/255.0 for x in rgb]
+    h,l,s = colorsys.rgb_to_hls(r,g,b)
+
+    # boost saturation a bit if too low (keeps it colorful)
+    s = max(s, MIN_SAT)
+
+    # If contrast is already good, still clamp lightness to a nice range
+    def rgb_from_hls(h,l,s):
+        rr,gg,bb = colorsys.hls_to_rgb(h,l,s)
+        return (int(round(rr*255)), int(round(gg*255)), int(round(bb*255)))
+
+    cur = rgb
+    cur_contrast = contrast_ratio(rel_luminance(cur), BG_LUM)
+
+    # If not enough contrast, increase lightness gradually
+    if cur_contrast < TARGET_CONTRAST:
+        # Start by pushing lightness up toward mid-high
+        l = max(l, 0.55)
+        for _ in range(30):
+            cur = rgb_from_hls(h,l,s)
+            cur_contrast = contrast_ratio(rel_luminance(cur), BG_LUM)
+            if cur_contrast >= TARGET_CONTRAST:
+                break
+            l = clamp(l + 0.02, 0.0, 0.88)
+
+    # Avoid being too blinding / white-ish
+    l = clamp(l, 0.45, 0.82)
+    cur = rgb_from_hls(h,l,s)
+    return cur
+
+def score_candidate(rgb, weight):
+    # prefer vivid, mid-light colors + good contrast
+    r,g,b = [x/255.0 for x in rgb]
+    h,l,s = colorsys.rgb_to_hls(r,g,b)
+
+    if s < 0.15:
+        return -1
+    # avoid extremes (too dark or too bright)
+    if l < 0.12 or l > 0.92:
+        return -1
+
+    lum = rel_luminance(rgb)
+    cr = contrast_ratio(lum, BG_LUM)
+    cr_factor = min(cr / TARGET_CONTRAST, 1.2)  # reward contrast but don't overdo
+
+    # weight by how common it is + saturation + closeness to mid-lightness
+    return weight * (s**2) * (1 - abs(l - 0.60)) * cr_factor
+
+chosen = None
+
+if img_path and os.path.exists(img_path):
+    im = Image.open(img_path).convert("RGB")
+    im = im.resize((96, 96))
+    pal = im.quantize(colors=12, method=2)  # 12 palette colors
+    palette = pal.getpalette()[:36]         # 12 * 3
+    counts = pal.getcolors() or []
+
+    best = (-1, None)
+    for count, idx in counts:
+        rgb = tuple(palette[idx*3:idx*3+3])
+        sc = score_candidate(rgb, count)
+        if sc > best[0]:
+            best = (sc, rgb)
+
+    if best[1] is not None:
+        chosen = best[1]
+
+# fallback if image failed
+if chosen is None and fallback and len(fallback)==6:
+    chosen = tuple(int(fallback[i:i+2], 16) for i in (0,2,4))
+
+if chosen is None:
+    raise SystemExit(0)
+
+chosen = adjust_for_contrast(chosen)
+
+hex6 = "%02x%02x%02x" % chosen
+# Apply
+os.system(f"/usr/bin/asusctl aura static -c {hex6} >/dev/null 2>&1")
+
+# Optional tiny debug (uncomment if needed)
+# open(os.path.expanduser("~/.cache/noctalia/kbd_color_debug.txt"), "w").write(hex6+"\n")
+PY

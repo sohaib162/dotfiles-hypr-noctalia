@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+color_file="$HOME/.cache/noctalia/kbd_color.txt"
+[[ -f "$color_file" ]] || exit 0
+
+COLOR="$(tr -d '# \n\r\t' <"$color_file")"
+
+# Expect 6 hex chars
+if [[ "$COLOR" =~ ^[0-9a-fA-F]{6}$ ]]; then
+  /usr/bin/asusctl aura static -c "$COLOR" || true
+fi

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE="$HOME/.cache/asus-aura_mode"
+COLOR_FILE="$HOME/.cache/noctalia/kbd_color.txt"   # created by your Noctalia template
+HEX="ffffff"
+
+if [[ -f "$COLOR_FILE" ]]; then
+  HEX="$(tr -d '# \n\r\t' < "$COLOR_FILE")"
+fi
+[[ "$HEX" =~ ^[0-9A-Fa-f]{6}$ ]] || HEX="ffffff"
+
+modes=(static breathe pulse rainbow-cycle rainbow-wave)
+
+cur="$(cat "$STATE" 2>/dev/null || echo "${modes[0]}")"
+idx=0
+for i in "${!modes[@]}"; do
+  [[ "${modes[$i]}" == "$cur" ]] && idx="$i" && break
+done
+next="${modes[$(( (idx+1) % ${#modes[@]} ))]}"
+echo "$next" > "$STATE"
+
+case "$next" in
+  static)        /usr/bin/asusctl aura static  -c "$HEX" ;;
+  breathe)       /usr/bin/asusctl aura breathe -c "$HEX" ;;
+  pulse)         /usr/bin/asusctl aura pulse   -c "$HEX" ;;
+  rainbow-cycle) /usr/bin/asusctl aura rainbow-cycle ;;
+  rainbow-wave)  /usr/bin/asusctl aura rainbow-wave ;;
+esac

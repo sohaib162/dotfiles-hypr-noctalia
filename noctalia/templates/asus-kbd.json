@@ -1,0 +1,4 @@
+{
+  "image": "{{image}}",
+  "fallback": "{{colors.source_color.default.hex_stripped}}"
+}
